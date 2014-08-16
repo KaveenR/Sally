@@ -53,7 +53,8 @@ class MainBot():
 		try:
 			data = urllib.urlopen("http://www.iheartquotes.com/api/v1/random?source=joel_on_software+paul_graham+prog_style").read()
 			e = data.split('\n')
-			return self.uscape('\n'.join(e[0:len(e)-2]))
+			txt = str('\n'.join(e[0:len(e)-2]))
+			return self.uscape(txt)
 		except:
 			return "cannot hit you, for now"
 
@@ -78,7 +79,10 @@ class MainBot():
 			return "Hmmmmm, Not in the mood"
 
 	def uscape(self,text):
-		return HTMLParser.HTMLParser().unescape(text)	
+		try:
+			return HTMLParser.HTMLParser().unescape(text)
+		except:
+			return text	
 
 raw_credentials = open('login.json').read()
 credentials = json.loads(raw_credentials)
