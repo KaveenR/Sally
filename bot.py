@@ -53,8 +53,8 @@ class MainBot():
 		try:
 			data = urllib.urlopen("http://www.iheartquotes.com/api/v1/random?source=joel_on_software+paul_graham+prog_style").read()
 			e = data.split('\n')
-			txt = str('\n'.join(e[0:len(e)-2]))
-			return self.uscape(txt)
+			txt = '\n'.join(e[0:len(e)-2])
+			return str(self.uscape(txt))
 		except:
 			return "cannot hit you, for now"
 
@@ -62,7 +62,7 @@ class MainBot():
 		try:
 			data = urllib.urlopen("http://api.icndb.com/jokes/random/").read()
 			joke = json.loads(data)
-			return self.uscape(joke['value']['joke']).encode('utf8')
+			return str(self.uscape(joke['value']['joke']).encode('utf8'))
 		except:
 			return "Norris killed the server"
 
@@ -72,7 +72,7 @@ class MainBot():
 			data = urllib.urlopen("http://api.duckduckgo.com/?q="+q+"&format=json&pretty=1&no_redirect=1").read()
 			result = json.loads(data)
 			if not (result["RelatedTopics"][0]["Text"]==""):
-				return self.uscape("Lets Seee.... \n" + (result["AbstractText"]).encode('utf8'))
+				return str(self.uscape("Lets Seee.... \n" + (result["AbstractText"]).encode('utf8')))
 			else:
 				return "Hmmmmm, Nothing to say"	
 		except:
