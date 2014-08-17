@@ -15,6 +15,6 @@ Strings containg 'hit' and 'me' will be replyed with geeky programmer related qu
 ###3.Do a Search.
 Strings that dosen't match any valid queries will be redirected to [duckduckgo](http://duckduckgo.com) Instent Answer API
 ##Acknowledgemnt
-*[Yowsup](https://github.com/tgalal/yowsup)
-*[iheartquotes](http://www.iheartquotes.com)
-*[incdb](http://incdb.com) 
+* [Yowsup](https://github.com/tgalal/yowsup)
+* [iheartquotes](http://www.iheartquotes.com)
+* [incdb](http://incdb.com) 
