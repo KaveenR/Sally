@@ -93,5 +93,6 @@ mb = MainBot(credentials["phone"],credentials["password"])
 
 while True:
         if not mb.running:
+        	time.sleep(1)
         	mb = None
         	mb = MainBot(credentials["phone"],credentials["password"])
