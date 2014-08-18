@@ -13,6 +13,7 @@ class MainBot():
 		self.signalsInterface.registerListener("disconnected", self.onDisconnected)
 		self.signalsInterface.registerListener("receipt_messageDelivered", self.onMessageDelivered)
 		self.methodsInterface.call("auth_login", (user, base64.b64decode(passwd)))
+		self.running = True
 
 	def onAuthSuccess(self,args):
 		print("Auth True")
@@ -20,9 +21,11 @@ class MainBot():
 
 	def onAuthFailed(self,args):
 		print("Auth False")
+		self.running = False
 
 	def onDisconnected(self,args):
 		print("Connection Terminated")
+		self.running = False
 
 	def onMessageDelivered(self,jid,messageId):
 		print("Message Delivered")
@@ -44,7 +47,7 @@ class MainBot():
 			self.methodsInterface.call("message_send", (jid, "Your Welcome, anything else"))
 		elif ('HITME' in text) or (('HIT' in text) and ('ME' in text)):
 			self.methodsInterface.call("message_send", (jid, self.action_send_quote()))
-		elif (('CHUCK' in text) or ('NORRIS' in text) and ('JOKE'or 'JOKES' in text)):
+		elif ((('CHUCK' in text) or ('NORRIS' in text)) and (('JOKE' in text) or ('JOKES' in text))):
 			self.methodsInterface.call("message_send", (jid, self.action_send_norris()))
 		else:
 			self.methodsInterface.call("message_send", (jid, self.do_a_search(text)))
@@ -87,5 +90,8 @@ class MainBot():
 raw_credentials = open('login.json').read()
 credentials = json.loads(raw_credentials)
 mb = MainBot(credentials["phone"],credentials["password"])
+
 while True:
-        pass
+        if not mb.running:
+        	mb = None
+        	mb = MainBot(credentials["phone"],credentials["password"])
