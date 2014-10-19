@@ -2,4 +2,4 @@ login.json
 .DS_Store
 .pyce
 res.json
-nohup
+nohup.out
