@@ -1,10 +1,12 @@
+#sally
 from Yowsup.connectionmanager import YowsupConnectionManager
-import json,base64,threading,time,urllib,HTMLParser
-
+import json,base64,threading,time,urllib,HTMLParser,random
+res = json.loads(open("res.json").read())
 class MainBot():
-	def __init__(self,user,passwd):
+	def __init__(self,user,passwd,res):
 		self.con = YowsupConnectionManager()
 		self.con.setAutoPong(True)
+		self.res = res
 		self.signalsInterface = self.con.getSignalsInterface()
 		self.methodsInterface = self.con.getMethodsInterface()
 		self.signalsInterface.registerListener("message_received", self.onMessageReceived)
@@ -14,6 +16,8 @@ class MainBot():
 		self.signalsInterface.registerListener("receipt_messageDelivered", self.onMessageDelivered)
 		self.methodsInterface.call("auth_login", (user, base64.b64decode(passwd)))
 		self.running = True
+		self.victims=[]
+		self.threads_=[]
 
 	def onAuthSuccess(self,args):
 		print("Auth True")
@@ -31,6 +35,13 @@ class MainBot():
 		print("Message Delivered")
 
 	def onMessageReceived(self, messageId, jid, messageContent, timestamp, wantsReceipt, pushName, isBroadcast):
+		if not(jid in self.victims):
+			self.victims.append(jid)
+			haunt_ = threading.Thread(target=self.haunt,args=(jid,))
+			print "------------>haunt" + str(jid)
+			self.threads_.append(haunt_)
+			haunt_.start()
+			
 		time.sleep(0.2)
 		self.methodsInterface.call("message_ack", (jid, messageId))
 		time.sleep(0.2)
@@ -38,61 +49,47 @@ class MainBot():
 
 	def react(self,jid,messageContent):
 		messageContent = messageContent.upper()
-		text = messageContent.split()
-		if ('HI' in text) or ('SUP' in text) or ('HELLO' in text):
-			self.methodsInterface.call("message_send", (jid, "Hello Im WABot Alpha"))
-		elif (('LOL' in text) or ('BYE' in text)):
-			self.methodsInterface.call("message_send", (jid, "hmmm..."))
-		elif (('OK' in text) or('THANKS' in text)):
-			self.methodsInterface.call("message_send", (jid, "Your Welcome, anything else"))
-		elif ('HITME' in text) or (('HIT' in text) and ('ME' in text)):
-			self.methodsInterface.call("message_send", (jid, self.action_send_quote()))
-		elif ((('CHUCK' in text) or ('NORRIS' in text)) and (('JOKE' in text) or ('JOKES' in text))):
-			self.methodsInterface.call("message_send", (jid, self.action_send_norris()))
+		text = messageContent.split()	
+		ch = lambda x:x in text
+		if ch('HI') or ch('SUP') or ch('HELLO'):
+			self.methodsInterface.call("message_send", (jid, "Hello, it's me Sally"))
+		elif ch('LOL') or ch('BYE'):
+			self.methodsInterface.call("message_send", (jid, text[0] + " and btw, die in hell"))
+		elif ch('WHO') and ch('ARE'):
+			self.methodsInterface.call("message_send", (jid, "dont envy me, you know who i am"))
+		elif (ch("SEXY")):
+			self.methodsInterface.call("message_send", (jid, "intrested in me, hah meet me at the 4th floor"))
 		else:
-			self.methodsInterface.call("message_send", (jid, self.do_a_search(text)))
+			self.methodsInterface.call("message_send", (jid, self.random_m().encode('utf-8')))
 
-	def action_send_quote(self):
-		try:
-			data = urllib.urlopen("http://www.iheartquotes.com/api/v1/random?source=joel_on_software+paul_graham+prog_style").read()
-			e = data.split('\n')
-			txt = '\n'.join(e[0:len(e)-2])
-			return str(self.uscape(txt))
-		except:
-			return "cannot hit you, for now"
+	def random_m(self):
+		return self.res["random"][random.randrange(0,len(self.res["random"]))]
+	def repeater(self):
+		cur = self.res["repeaters"][random.randrange(0,len(self.res["repeaters"]))]
+		build=""
+		for i in range(1,random.randrange(1,15)):
+			exl = ""
+			for x in range(0,i):
+				exl +="!"
+			build += " "+cur+" "+exl
+		return build
 
-	def action_send_norris(self):
-		try:
-			data = urllib.urlopen("http://api.icndb.com/jokes/random/").read()
-			joke = json.loads(data)
-			return str(self.uscape(joke['value']['joke']).encode('utf8'))
-		except:
-			return "Norris killed the server"
-
-	def do_a_search(self,text): 
-		try:
-			q = '+'.join(text)
-			data = urllib.urlopen("http://api.duckduckgo.com/?q="+q+"&format=json&pretty=1&no_redirect=1").read()
-			result = json.loads(data)
-			if not (result["RelatedTopics"][0]["Text"]==""):
-				return str(self.uscape("Lets Seee.... \n" + (result["AbstractText"]).encode('utf8')))
+	def haunt(self,jid):
+		while True:
+			time.sleep(60*60)
+			if random.randrange(0,2) == 0:
+				self.methodsInterface.call("message_send", (jid, self.random_m().encode('utf-8')))
 			else:
-				return "Hmmmmm, Nothing to say"	
-		except:
-			return "Hmmmmm, Not in the mood"
+				self.methodsInterface.call("message_send", (jid, self.repeater().encode('utf-8')))
+			
 
-	def uscape(self,text):
-		try:
-			return HTMLParser.HTMLParser().unescape(text)
-		except:
-			return text	
 
 raw_credentials = open('login.json').read()
 credentials = json.loads(raw_credentials)
-mb = MainBot(credentials["phone"],credentials["password"])
+mb = MainBot(credentials["phone"],credentials["password"],res)
 
 while True:
         if not mb.running:
         	time.sleep(1)
         	mb = None
-        	mb = MainBot(credentials["phone"],credentials["password"])
+        	mb = MainBot(credentials["phone"],credentials["password"],res)
